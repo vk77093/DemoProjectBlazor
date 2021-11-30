@@ -1,0 +1,155 @@
+﻿@page "/subcategory"
+@page "/subcategory/{Id:int}"
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center card-title">Add The SubCategory</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+              <EditForm Model="subCategory"  OnValidSubmit="ManageForm">
+                 <div class="row">
+                     <div class="col-sm-3">
+                         <div class="form-group">
+                             <label for="subCode">Sub Category Code</label>
+                             <input type="text" id="subCode" class="form-control" @bind-value="subCategory.SubCategoryCode" />
+                             <ValidationMessage For="()=>subCategory.SubCategoryCode" />
+                         </div>
+                     </div>
+                     <div class="col-sm-3">
+                         <div class="form-group">
+                             <label for="subName">Sub Category Name</label>
+                             <input type="text" id="subCode" class="form-control" @bind-value="subCategory.SubCategoryName" />
+                             <ValidationMessage For="()=>subCategory.SubCategoryName" />
+                         </div>
+                     </div>
+                     <div class="col-sm-3">
+                         <div class="form-group">
+                             <label for="categorySel">Please select Partent Category</label>
+                             <select form="categorySel" @bind="subCategory.CategoryId" class="form-control">
+                                 @foreach (var cat in categories)
+                                 {
+                                     <option value="@cat.CategoryId">@cat.CategoryName</option>
+                                 }
+                             </select>
+                         </div>
+                     </div>
+                         <div class="col-sm-3 text-center mt-2">
+                             <button type="submit" class="btn btn-primary">@ButtonTitle</button>
+                         </div>
+                    
+                 </div>
+              </EditForm>  
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-2">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center card-title">All The List Of Sub Category</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Sub Category Code</th>
+                        <th>Name</th>
+                        <th>Parent Category</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var subcate in subCategories)
+                    {
+                    <tr>
+                        <td>@subcate.SubCategoryId</td>
+                        <td>@subcate.SubCategoryCode</td>
+                        <td>@subcate.SubCategoryName</td>
+                        <td>@subcate.Category.CategoryName</td>
+                        <td>@subcate.CreatedAt.ToShortDateString()</td>
+                        <td>@(subcate.UpdatedAt.Equals(string.Empty) ? " " : @subcate.UpdatedAt.ToShortDateString())</td>
+                        <td><button @onclick="@(()=>GoToEdit(subcate.SubCategoryId))"><EditIcon/></button></td>
+                        <td><button @onclick=@(()=>HandleDelete(subcate.SubCategoryId))><DeleteIcon/></button></td>
+                    </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@code {
+    private SubCategory subCategory = new SubCategory();
+    private IEnumerable<SubCategory> subCategories;
+    private IEnumerable<Category> categories { get; set; }
+    [Inject]
+    public ISubCategoryRepo subCategoryRepo { get; set; }
+    [Inject]
+    public IGetCategoryForSubCategoryUseCase subCategoryUseCase { get; set; }
+    [Inject]
+    public NavigationManager navigation { get; set; }
+    public string errorMessage { get; set; } = string.Empty;
+    private string ButtonTitle = "Add SubCatergory";
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override void OnInitialized()
+    {
+        categories = subCategoryUseCase.GetAllCategories();
+        LoadSubCategory();
+    }
+    public void ManageForm()
+    {
+        if (ButtonTitle == "Add SubCatergory" && subCategory.SubCategoryId ==0)
+        {
+            if (subCategoryRepo.AlreadyExistSubCategory(subCategory) == true)
+            {
+                errorMessage = $"Can not Add the dublicate {subCategory.SubCategoryCode} and {subCategory.SubCategoryName} is Already exits";
+                DisapperErrorMessage();
+            }
+            else
+            {
+                subCategoryRepo.AddSubCategory(subCategory);
+                navigation.NavigateTo("/subcategory", true);
+                LoadSubCategory();
+            }
+        }else if(ButtonTitle== "Update SubCategory" && subCategory.SubCategoryId != 0)
+            {
+            subCategoryRepo.UpdateSubCategory(subCategory);
+            navigation.NavigateTo("subcategory",true);
+            LoadSubCategory();
+            }
+
+
+    }
+    private void LoadSubCategory()
+    {
+        subCategories = subCategoryRepo.GetSubCategories();
+    }
+    public async void DisapperErrorMessage()
+    {
+        await Task.Delay(2000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+    private void HandleDelete(int id)
+    {
+        subCategoryRepo.DeleteSubcategory(id);
+        LoadSubCategory();
+    }
+    public void GoToEdit(int id)
+    {
+        navigation.NavigateTo($"subcategory/{id}");
+        ButtonTitle = "Update SubCategory";
+        subCategory = subCategoryRepo.GetSubCategoryById(id);
+    }
+}

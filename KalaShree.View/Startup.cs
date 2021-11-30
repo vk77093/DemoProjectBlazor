@@ -1,6 +1,7 @@
 using KalaShree.Controllers.Implemtation;
 using KalaShree.Controllers.InterFaces;
 using KalaShree.Controllers.SqlDataBase;
+using KalaShree.Controllers.UseCases.MasterUseCase;
 using KalaShree.View.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -40,6 +41,10 @@ namespace KalaShree.View
                 opt.UseSqlServer(Configuration.GetConnectionString("DataBaseConnection"));
             });
             services.AddScoped<ICategoryRepo, CategoryRepo>();
+            services.AddScoped<ISubCategoryRepo, SubCategoryRepo>();
+
+            //use case
+            services.AddTransient<IGetCategoryForSubCategoryUseCase, GetCategoryForSubCategoryUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
