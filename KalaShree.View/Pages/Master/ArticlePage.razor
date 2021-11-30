@@ -1,0 +1,170 @@
+﻿@page "/article"
+@page "/article/{Id:int}"
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center card-title">Add The SubCategory</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+                <EditForm Model="article" OnValidSubmit="ManageForm">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="articleCode">Article Code</label>
+                                <input type="text" id="articleCode" class="form-control" @bind-value="article.ArticleCode" />
+                                <ValidationMessage For="()=>article.ArticleCode" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="ArticleName">Article Name</label>
+                                <input type="text" id="ArticleName" class="form-control" @bind-value="article.ArticleName" />
+                                <ValidationMessage For="()=>article.ArticleName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="Articledes">Article Description</label>
+                                <input type="text" id="Articledes" class="form-control" @bind-value="article.ArticleDescription" />
+                                <ValidationMessage For="()=>article.ArticleDescription" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="subcateSel">Please select SubCategory</label>
+                                <select form="subcateSel" @bind="article.SubCategoryId" class="form-control">
+                                    @foreach (var sub in subCategories)
+                                    {
+                                        <option value="@sub.SubCategoryId">@sub.SubCategoryName</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="()=>article.SubCategoryId"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 text-center mt-2">
+                            <button type="submit" class="btn btn-primary">@ButtonTitle</button>
+                        </div>
+
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-2">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center card-title">All The List Of Sub Category</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Article code</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Parent SubCategory</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var art in articles)
+                    {
+                        <tr>
+                            <td>@art.ArticleId</td>
+                            <td>@art.ArticleCode</td>
+                            <td>@art.ArticleName</td>
+                            <td>@art.ArticleDescription</td>
+                            <td>@art.SubCategory.SubCategoryName</td>
+                            <td>@art.CreatedAt.ToShortDateString()</td>
+                            <td>@(art.UpdatedAt.Equals(string.Empty) ? " " : art.UpdatedAt.ToShortDateString())</td>
+                            <td><button @onclick="@(()=>GoToEdit(art.SubCategoryId))"><EditIcon /></button></td>
+                            <td><button @onclick=@(()=>HandleDelete(art.SubCategoryId))><DeleteIcon /></button></td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@code {
+    private Article article = new Article();
+    [Inject]
+    public IArticleRepo articleRepo { get; set; }
+    [Inject]
+    public IGetSubCategoryUseCase SubCategoryUseCase { get; set; }
+    [Inject]
+    public NavigationManager Navigation { get; set; }
+
+    public IEnumerable<SubCategory> subCategories;
+    public IEnumerable<Article> articles;
+    private string errorMessage = string.Empty;
+    [Parameter]
+    public int Id { get; set; }
+
+    public string ButtonTitle = "Add Article";
+    protected override void OnInitialized()
+    {
+        subCategories = SubCategoryUseCase.GetSubCategoriesForArticle();
+        LoadArticle();
+    }
+
+    private void ManageForm()
+    {
+        if (ButtonTitle == "Add Article" && article.ArticleId == 0)
+        {
+            if (articleRepo.IsAlreadyExists(article) == true)
+            {
+                errorMessage = $"Can't add the dublicate value {article.ArticleCode} and {article.ArticleName} already exist";
+                DisapperErrorMessage();
+            }
+            else
+            {
+                articleRepo.AddArticle(article);
+                Navigation.NavigateTo("/article", true);
+                LoadArticle();
+            }
+
+        }
+        else if (ButtonTitle == "Update Article" && article.ArticleId != 0)
+        {
+
+            articleRepo.UpdateArticle(article);
+            Navigation.NavigateTo("/article", true);
+            LoadArticle();
+        }
+
+    }
+    public async void DisapperErrorMessage()
+    {
+        await Task.Delay(2000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+    public void LoadArticle()
+    {
+        articles = articleRepo.GetArticles();
+    }
+    public void GoToEdit(int id)
+    {
+
+        Navigation.NavigateTo($"article/{id}");
+        ButtonTitle = "Update Article";
+        article = articleRepo.GetArticleById(id);
+    }
+    public void HandleDelete(int id)
+    {
+        articleRepo.DeleteArticle(id);
+        LoadArticle();
+    }
+}

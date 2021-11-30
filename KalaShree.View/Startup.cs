@@ -42,9 +42,11 @@ namespace KalaShree.View
             });
             services.AddScoped<ICategoryRepo, CategoryRepo>();
             services.AddScoped<ISubCategoryRepo, SubCategoryRepo>();
+            services.AddScoped<IArticleRepo, ArticleRepo>();
 
             //use case
             services.AddTransient<IGetCategoryForSubCategoryUseCase, GetCategoryForSubCategoryUseCase>();
+            services.AddTransient<IGetSubCategoryUseCase, GetSubCategoryUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
