@@ -1,0 +1,140 @@
+﻿@page "/"
+@page "/edit/{Id:int}"
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="text-center card-title">Add All the Category</h4>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            
+            
+            <EditForm Model="category" class="form-inline" OnValidSubmit="AddCategory">
+                <DataAnnotationsValidator />
+
+                <div class="form-group">
+                    <label for="categoryCode">Category Code</label>
+                    <input type="text" id="categoryCode" class="form-control" @bind-value="category.CategoryCode" />
+                    <ValidationMessage For="()=>category.CategoryCode" /> 
+                </div>
+                <div class="form-group">
+                    <label for="categoryName">Category Name</label>
+                    <input type="text" id="categoryName" class="form-control" @bind-value="category.CategoryName" />
+                    <ValidationMessage For="()=>category.CategoryName" />
+                </div>
+                <div class="text-center ml-2">
+                    <button type="submit" class="btn btn-primary">@ButtonLabel</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<div class="container mt-2">
+    <div class="card">
+<div class="card-header">
+    <h4 class="text-center card-title">List Of All the Categories</h4>
+</div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Category Code</th>
+                        <th>Category Name</th>
+                        <th>CreatedAt</th>
+                        <th>UpdateAt</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cate in categories)
+                    {
+                    <tr>
+                        <td>@cate.CategoryId</td>
+                        <td>@cate.CategoryCode</td>
+                        <td>@cate.CategoryName</td>
+                        <td>@cate.CreatedAt.ToString("dd/mm/yy")</td>
+                        <td>@cate.UpdatedAt.ToString("dd/mm/yy")</td>
+                        <td><button @onclick="(()=>GoToEdit(cate.CategoryId))"><EditIcon /></button></td>
+                        <td><button @onclick="(()=>DeleteHandle(cate.CategoryId))"><DeleteIcon/></button></td>
+                    </tr>
+
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@code {
+    public Category category=new Category();
+    public string errorMessage { get; set; }=string.Empty;
+    private IEnumerable<Category> categories;
+    private string ButtonLabel = "Add Category";
+
+    [Inject]
+    private ICategoryRepo categoryRepo { get; set; }
+    [Inject]
+    private NavigationManager Navigation { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+
+    public void AddCategory()
+    {
+        if(ButtonLabel =="Add Category" && category.CategoryId==0)
+        {
+            if (categoryRepo.AlreadyExtistCategory(category) == true)
+            {
+                errorMessage = $"Can not Add the dublicate {category.CategoryCode} and {category.CategoryName} is Already exits";
+                DisapperErrorMessage();
+            }
+            else
+            {
+                categoryRepo.AddCategory(category);
+                Navigation.NavigateTo("/", true);
+                categories = categoryRepo.GetCategories();
+
+            }
+
+        }
+        else if(ButtonLabel== "Update Category" && category.CategoryId !=0)
+        {
+
+            categoryRepo.UpdateCategory(category);
+            Navigation.NavigateTo("/",true);
+            categories = categoryRepo.GetCategories();
+
+        }
+
+    }
+    protected override void OnInitialized()
+    {
+        categories = categoryRepo.GetCategories();
+
+    }
+
+    public void GoToEdit(int id)
+    {
+
+        Navigation.NavigateTo($"/edit/{id}");
+        ButtonLabel = "Update Category";
+        category = categoryRepo.GetCategoriesById(id);
+    }
+    public void DeleteHandle(int id)
+    {
+        categoryRepo.DeleteCategory(id);
+        categories = categoryRepo.GetCategories();
+
+    }
+    public async void DisapperErrorMessage()
+    {
+        await Task.Delay(2000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+}
