@@ -87,8 +87,8 @@
                             <td>@art.SubCategory.SubCategoryName</td>
                             <td>@art.CreatedAt.ToShortDateString()</td>
                             <td>@(art.UpdatedAt.Equals(string.Empty) ? " " : art.UpdatedAt.ToShortDateString())</td>
-                            <td><button @onclick="@(()=>GoToEdit(art.SubCategoryId))"><EditIcon /></button></td>
-                            <td><button @onclick=@(()=>HandleDelete(art.SubCategoryId))><DeleteIcon /></button></td>
+                            <td><button @onclick="@(()=>GoToEdit(art.ArticleId))"><EditIcon /></button></td>
+                            <td><button @onclick=@(()=>HandleDelete(art.ArticleId))><DeleteIcon /></button></td>
                         </tr>
 
                     }
