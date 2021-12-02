@@ -5,7 +5,7 @@ namespace KalaShree.Controllers.InterFaces
 {
     public interface IArticleRepo
     {
-        void AddArticle(Article article);
+        void AddArticle(Article T);
         void DeleteArticle(int articleId);
         Article GetArticleById(int articleId);
         IEnumerable<Article> GetArticles();

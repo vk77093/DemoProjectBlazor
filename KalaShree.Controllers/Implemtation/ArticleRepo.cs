@@ -24,7 +24,8 @@ namespace KalaShree.Controllers.Implemtation
         public void AddArticle(Article article)
         {
             try
-            {
+            {   
+                article.ArticleCode = GetNextArticleCode(article.ArticleCode);
                 dataBase.Articles.Add(article);
                 var saveStatus = dataBase.SaveChanges();
             }
@@ -67,5 +68,25 @@ namespace KalaShree.Controllers.Implemtation
             if (articleCodeAndName != null) return true;
             return false;
         }
+       public string GetNextArticleCode(string id)
+        {
+            IEnumerable<Article> articles = GetArticles();
+            if(articles.Count() <=0)
+            {
+                id = "A"+1;
+            }
+            else
+            {
+                foreach (var art in articles)
+                {
+                    int count = 1;
+                    id = "A" + (art.ArticleId+count++);
+                }
+            }
+         
+            
+            return id;
+        }
+            
     }
 }

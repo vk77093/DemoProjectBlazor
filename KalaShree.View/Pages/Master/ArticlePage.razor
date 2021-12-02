@@ -13,13 +13,13 @@
                 }
                 <EditForm Model="article" OnValidSubmit="ManageForm">
                     <div class="row">
-                        <div class="col-sm-3">
+                        @*<div class="col-sm-3">
                             <div class="form-group">
                                 <label for="articleCode">Article Code</label>
                                 <input type="text" id="articleCode" class="form-control" @bind-value="article.ArticleCode" />
                                 <ValidationMessage For="()=>article.ArticleCode" />
                             </div>
-                        </div>
+                        </div>*@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label for="ArticleName">Article Name</label>
@@ -101,6 +101,7 @@
     private Article article = new Article();
     [Inject]
     public IArticleRepo articleRepo { get; set; }
+
     [Inject]
     public IGetSubCategoryUseCase SubCategoryUseCase { get; set; }
     [Inject]

@@ -17,5 +17,16 @@ namespace KalaShree.Controllers.SqlDataBase
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Article> Articles { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            foreach (var ForeignKey in modelBuilder.Model.GetEntityTypes()
+                .SelectMany(e=>e.GetForeignKeys()))
+            {
+                ForeignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+        }
     }
+    
 }
