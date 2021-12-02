@@ -1,4 +1,5 @@
-﻿using KalaShree.Controllers.InterFaces;
+﻿using KalaShree.Common.SequenceClass;
+using KalaShree.Controllers.InterFaces;
 using KalaShree.Controllers.SqlDataBase;
 using KalaShree.models.Masters;
 using System;
@@ -23,6 +24,7 @@ namespace KalaShree.Controllers.Implemtation
         }
         public void AddSubCategory(SubCategory subCategory)
         {
+            subCategory.SubCategoryCode = GetSubCategoryCode(subCategory.SubCategoryCode);
             dataBase.SubCategories.Add(subCategory);
             dataBase.SaveChanges();
         }
@@ -67,6 +69,24 @@ namespace KalaShree.Controllers.Implemtation
               || x.SubCategoryName == subCategory.SubCategoryName);
             if (SubCatCodeAndName != null) return true;
             return false;
+        }
+        public string GetSubCategoryCode(string codeName)
+        {
+            IEnumerable<SubCategory> subCategories = GetSubCategories();
+
+            if (subCategories.Count() <=0)
+            {
+                codeName = SequenceParameter.SubCategorySequence + 1;
+            }
+            else
+            {
+                foreach (var subCat in subCategories)
+                {
+                    int count = 1;
+                    codeName = SequenceParameter.SubCategorySequence + (subCat.SubCategoryId + count++);
+                }
+            }
+            return codeName;
         }
     }
 }

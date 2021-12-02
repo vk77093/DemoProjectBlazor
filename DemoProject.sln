@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KalaShree.models", "KalaShree.models\KalaShree.models.csproj", "{3E8A1AC6-9641-44FE-95EE-37105BD9D185}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KalaShree.models", "KalaShree.models\KalaShree.models.csproj", "{3E8A1AC6-9641-44FE-95EE-37105BD9D185}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KalaShree.Controllers", "KalaShree.Controllers\KalaShree.Controllers.csproj", "{CEBD8EB6-476A-4C98-9707-08C826280DDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KalaShree.Controllers", "KalaShree.Controllers\KalaShree.Controllers.csproj", "{CEBD8EB6-476A-4C98-9707-08C826280DDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KalaShree.View", "KalaShree.View\KalaShree.View.csproj", "{D2BA7BF8-DE74-4B3A-96C0-AB979643D7AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KalaShree.View", "KalaShree.View\KalaShree.View.csproj", "{D2BA7BF8-DE74-4B3A-96C0-AB979643D7AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KalaShree.Common", "KalaShree.Common\KalaShree.Common.csproj", "{809A4A78-EBB4-4DB1-B47D-2AEEE37DDF8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{D2BA7BF8-DE74-4B3A-96C0-AB979643D7AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2BA7BF8-DE74-4B3A-96C0-AB979643D7AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2BA7BF8-DE74-4B3A-96C0-AB979643D7AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{809A4A78-EBB4-4DB1-B47D-2AEEE37DDF8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{809A4A78-EBB4-4DB1-B47D-2AEEE37DDF8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{809A4A78-EBB4-4DB1-B47D-2AEEE37DDF8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{809A4A78-EBB4-4DB1-B47D-2AEEE37DDF8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

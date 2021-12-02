@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\KalaShree.Common\KalaShree.Common.csproj" />
     <ProjectReference Include="..\KalaShree.models\KalaShree.models.csproj" />
   </ItemGroup>
 

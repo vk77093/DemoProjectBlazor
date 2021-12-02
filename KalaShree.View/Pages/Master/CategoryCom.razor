@@ -1,0 +1,143 @@
+﻿@page "/category"
+@page "/category/{Id:int}"
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="text-center card-title">Add The Category</h4>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+                <EditForm Model="categoryMode" OnValidSubmit="ManagaForm">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="name">Category Name</label>
+                                <input type="text" for="name" class="form-control" @bind-value="categoryMode.CategoryName" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="desc">Category Name</label>
+                                <input type="text" for="desc" class="form-control" @bind-value="categoryMode.CategoryDesc" />
+                            </div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <button type="submit" class="btn btn-primary">@ButtonLabel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-2">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="text-center card-title">List Of All the Categories</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Category Code</th>
+                        <th>Category Name</th>
+                        <th>CreatedAt</th>
+                        <th>UpdateAt</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cate in categories)
+                    {
+                        <tr>
+                            <td>@cate.CategoryId</td>
+                            <td>@cate.CategoryCode</td>
+                            <td>@cate.CategoryName</td>
+                            <td>@cate.CreatedAt.ToString("dd/mm/yy")</td>
+                            <td>@cate.UpdatedAt.ToString("dd/mm/yy")</td>
+                            <td><button @onclick="(()=>GoToEdit(cate.CategoryId))"><EditIcon /></button></td>
+                            <td><button @onclick="(()=>DeleteHandle(cate.CategoryId))"><DeleteIcon /></button></td>
+                        </tr>
+
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@code {
+    private Category categoryMode = new Category();
+    public string ButtonLabel = "Add Category";
+    private IEnumerable<Category> categories;
+    public string errorMessage { get; set; } = string.Empty;
+
+    private void ManagaForm()
+    {
+        if(ButtonLabel =="Add Category" && categoryMode.CategoryId == 0)
+        {
+            if (categoryRepo.AlreadyExtistCategory(categoryMode) == true)
+            {
+                errorMessage = $"Can not Add the dublicate {categoryMode.CategoryName} and {categoryMode.CategoryCode}";
+                DisapperErrorMessage();
+            }
+            else
+            {
+                categoryRepo.AddCategory(categoryMode);
+                Navigation.NavigateTo("/category", true);
+                LoadCategory();
+
+            }
+
+        }
+        else if (ButtonLabel == "Update Category" && categoryMode.CategoryId != 0)
+        {
+            categoryRepo.UpdateCategory(categoryMode);
+            Navigation.NavigateTo("category", true);
+            LoadCategory();
+        }
+    }
+    [Inject]
+    public ICategoryRepo categoryRepo { get; set; }
+    [Inject]
+    private NavigationManager Navigation { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        LoadCategory();
+    }
+    public void GoToEdit(int id)
+    {
+
+        Navigation.NavigateTo($"/edit/{id}");
+        ButtonLabel = "Update Category";
+        categoryMode = categoryRepo.GetCategoriesById(id);
+    }
+    public void DeleteHandle(int id)
+    {
+        categoryRepo.DeleteCategory(id);
+        categories = categoryRepo.GetCategories();
+
+    }
+    public async void DisapperErrorMessage()
+    {
+        await Task.Delay(2000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+    private void LoadCategory()
+    {
+        categories = categoryRepo.GetCategories();
+    }
+}

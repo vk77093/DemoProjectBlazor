@@ -1,4 +1,5 @@
-﻿using KalaShree.Controllers.InterFaces;
+﻿using KalaShree.Common.SequenceClass;
+using KalaShree.Controllers.InterFaces;
 using KalaShree.Controllers.SqlDataBase;
 using KalaShree.models.Masters;
 using System;
@@ -73,14 +74,14 @@ namespace KalaShree.Controllers.Implemtation
             IEnumerable<Article> articles = GetArticles();
             if(articles.Count() <=0)
             {
-                id = "A"+1;
+                id = SequenceParameter.ArticleSequence+ 1;
             }
             else
             {
                 foreach (var art in articles)
                 {
                     int count = 1;
-                    id = "A" + (art.ArticleId+count++);
+                    id = SequenceParameter.ArticleSequence + (art.ArticleId+count++);
                 }
             }
          

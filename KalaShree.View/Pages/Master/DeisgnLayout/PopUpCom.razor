@@ -1,0 +1,283 @@
+﻿@page "/popup"
+@page "/popup/{Id:int}"
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="text-center card-title">List Of All the Categories</h4>
+        </div>
+        <div class="card-body">
+
+            <!-- Trigger/Open The Modal -->
+            <button id="myBtn" class="btn btn-primary" @onclick="OpenModel">Add Model</button>
+            @if (editButtonVisbile == true)
+            {
+                <button type="button" class="btn btn-primary ml-2" @onclick="(()=>OpenEditCatgoryForm(selectedRadio))">Edit Category</button>
+                <button type="button" class="btn btn-primary ml-2" @onclick="(()=>HandleDelete(selectedRadio))">Delete Category</button>
+            }
+            <!-- The Modal -->
+            <div id="model" style="@modal" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span class="close" @onclick="closeModel">&times;</span>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="text-center card-title">Add the Category</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <EditForm Model="categoryMode" OnValidSubmit="HandleForm">
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary />
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="name">Category Name</label>
+                                                <input type="text" for="name" class="form-control" @bind-value="categoryMode.CategoryName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="desc">Category Desc</label>
+                                                <input type="text" for="desc" class="form-control" @bind-value="categoryMode.CategoryDesc" />
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <button type="submit" class="btn btn-primary">@ButtonLabel</button>
+                                            <button type="button" @onclick="CancelTask" class="btn btn-primary">Cancel</button>
+                                        </div>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!--end of model box-->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Id</th>
+                        <th>Category Code</th>
+                        <th>Category Name</th>
+                        <th>CreatedAt</th>
+                        <th>UpdateAt</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cate in categories)
+                    {
+                        <tr>
+                            <td>
+
+                                <input type="radio" name="group" @bind-value="cate.CategoryId" class="form-check-input ml-2 text-center"
+                                       checked="@(selectedRadio==cate.CategoryId)" @onclick="(()=>EditButtonShow(cate.CategoryId))" />
+                            </td>
+                            <td>@cate.CategoryId</td>
+                            <td>@cate.CategoryCode</td>
+                            <td>@cate.CategoryName</td>
+                            <td>@cate.CreatedAt.ToString("dd/MM/yy")</td>
+                            <td>@cate.UpdatedAt.ToString("dd/MM/yy")</td>
+
+                        </tr>
+
+                    }
+
+                </tbody>
+            </table>
+        </div>
+        @*@selectedRadio*@
+    </div>
+</div>
+
+    @code {
+
+        //Handling Model Box
+        private string modal { get; set; }
+        private void OpenModel()
+        {
+            modal = $"display:block";
+        }
+        private void closeModel()
+        {
+            modal = $"display:none";
+        }
+
+        //Showing List of Categories 
+        private IEnumerable<Category> categories;
+        [Inject]
+        private ICategoryRepo categoryRepo { get; set; }
+
+        private Category categoryMode = new Category();
+        private string ButtonLabel = "Add Category";
+        public string errorMessage { get; set; } = string.Empty;
+        [Inject]
+        private NavigationManager Navigation { get; set; }
+        [Parameter]
+        public int Id { get; set; }
+        private bool formVisbilbilty = false;
+
+        private void LoadCategories()
+        {
+            categories = categoryRepo.GetCategories();
+        }
+        protected override void OnInitialized()
+        {
+            LoadCategories();
+        }
+
+        public void HandleForm()
+        {
+            if (ButtonLabel == "Add Category" && categoryMode.CategoryId == 0)
+            {
+                if (categoryRepo.AlreadyExtistCategory(categoryMode) == true)
+                {
+                    errorMessage = $"Can not Add the dublicate {categoryMode.CategoryName} and {categoryMode.CategoryCode}";
+                    DisapperErrorMessage();
+                }
+                else
+                {
+                    categoryRepo.AddCategory(categoryMode);
+                    Navigation.NavigateTo("/popup", true);
+                    LoadCategories();
+
+                }
+
+            }
+            else if (ButtonLabel == "Update Category" && categoryMode.CategoryId != 0)
+            {
+                categoryRepo.UpdateCategory(categoryMode);
+                Navigation.NavigateTo("popup", true);
+                LoadCategories();
+            }
+        }
+        private void CancelTask()
+        {
+            closeModel();
+        }
+        public async void DisapperErrorMessage()
+        {
+            await Task.Delay(2000);
+            errorMessage = string.Empty;
+            StateHasChanged();
+        }
+
+        //for radion button
+        private int selectedRadio { get; set; } = 0;
+        private void OpenEditCatgoryForm(int id)
+        {
+            OpenModel();
+            Navigation.NavigateTo($"/popup/{id}");
+            ButtonLabel = "Update Category";
+            categoryMode = categoryRepo.GetCategoriesById(id);
+
+        }
+        private bool editButtonVisbile = false;
+        public void EditButtonShow(int id)
+        {
+            selectedRadio = id;
+            if (selectedRadio > 0)
+            {
+                editButtonVisbile = true;
+            }
+        }
+        public void HandleDelete(int id)
+        {
+            categoryRepo.DeleteCategory(id);
+            LoadCategories();
+        }
+}
+    <style>
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 0.4s;
+            animation-name: animatetop;
+            animation-duration: 0.4s
+        }
+
+        /* Add Animation */
+        @@-webkit-keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+
+            to {
+                top: 0;
+                opacity: 1
+            }
+        }
+
+        @@keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+
+            to {
+                top: 0;
+                opacity: 1
+            }
+        }
+
+        /* The Close Button */
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+        .modal-header {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .modal-body {
+            padding: 2px 16px;
+        }
+
+        .modal-footer {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+        }
+    </style>
